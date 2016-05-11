@@ -61,7 +61,6 @@ cdata <- function(out, tx, cov = NULL, cov_type = c(1),
 #' @export
 #' @examples
 #' des_out()
-
 des_out <- function(cdata, bin_no=30, col_bar= "purple4", col_line="#d3d3d3", quints = TRUE, theme = t) {
   
   # extract data
@@ -101,7 +100,6 @@ des_out <- function(cdata, bin_no=30, col_bar= "purple4", col_line="#d3d3d3", qu
 #' @param theme Ggplot theme
 #' @examples
 #' des_covs()
-
 des_covs <- function(cdata, covs = c(1), bin_no=30, quints = 0, col_bar= "purple4", col_line="#d3d3d3", 
                      theme = theme_bw()){
   ## Set up empty list
