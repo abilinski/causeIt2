@@ -206,3 +206,87 @@ cause_reg <- function(cdata, covs = (1), digits = 2){
   
 }
 
+#************************************ MATCHING ***************************************#
+
+# Prepare to generate outputs related to matching
+match.covars <- function(n.covars = 0){
+  
+  if (n.covars == 0){n.covars = (ncol(h$df)-2)}
+  
+  # Set up difference in means, L1, and regression results
+  matchbal = data.frame("all"=rep(NA, n.covars),"trimmed"=NA,"pscore"=NA,"mahalanobis"=NA)
+  matchimbal = data.frame("all"=NA,"trimmed"=NA,"pscore"=NA,"mahalanobis"=NA)
+  matchreg = data.frame("all"=NA,"trimmed"=NA,"pscore"=NA,"mahalanobis"=NA)
+  rownames(matchbal) <- colnames(h$df)[1:n.covars + 2]
+  matchbal$all <- apply(as.matrix(h$df[h$df$tx==1, 3:(n.covars+2)]), 2, mean) - apply(as.matrix(h$df[h$df$tx==0, 3:(n.covars+2)]), 2, mean)
+  matchimbal$all <- list(cem::imbalance(group=h$df$tx, data=h$df[ , 1:n.covars+2], drop=c("outcome", "tx")))
+  matchreg$all <- list(lm(outcome ~ tx+sex+antih+barb+chemo+cage+cigar+lgest+lmotage+lpbc415+lpbc420+motht+motwt+mbirth+psydrug+respir+ses+sib, data = h$df))
+  
+  # Calculate propensity scores are trim both treatment groups
+  pscores.logit <- glm(tx ~ sex+antih+barb+chemo+cage+cigar+lgest+lmotage+lpbc415+lpbc420+motht+motwt+mbirth+psydrug+respir+ses+sib, family = "binomial", data = h$df)$fitted
+  pscore.treat <- pscores.logit[h$df$tx==1]
+  pscore.control <- pscores.logit[h$df$tx==0]
+  common.support <- c(max(min(pscore.treat), min(pscore.control)), min(max(pscore.treat), max(pscore.control)))
+  common.df <- h$df[(pscores.logit >= common.support[1]) & (pscores.logit <= common.support[2]), ]
+  matchbal$trimmed <- apply(as.matrix(common.df[common.df$tx==1, 3:(n.covars+2)]), 2, mean) - apply(as.matrix(common.df[common.df$tx==0, 3:(n.covars+2)]), 2, mean)
+  matchimbal$trimmed <- list(cem::imbalance(group=common.df$tx, data=common.df[ , 1:(n.covars+2)], drop=c("outcome", "tx")))
+  matchreg$trimmed <- list(lm(outcome ~ tx+sex+antih+barb+chemo+cage+cigar+lgest+lmotage+lpbc415+lpbc420+motht+motwt+mbirth+psydrug+respir+ses+sib, data = common.df))
+  
+  # Output comparison histogram
+  png("PScore.png", height=8, width=10, units = "in", res = 300)
+  par(mfrow = c(1, 2))
+  hist(pscore.treat[(pscore.treat >= common.support[1]) & (pscore.treat <= common.support[2])], col = "red", breaks = 10, main = "Histogram of Trimmed\nData Propensity Scores:\nActive Treatment Group", xlab = "Propensity Score")
+  hist(pscore.control[(pscore.control >= common.support[1]) & (pscore.control <= common.support[2])], col = "blue", breaks = 10, main = "Histogram of Trimmed\nData Propensity Scores:\nControl Group", xlab = "Propensity Score")
+  par(mfrow = c(1, 1))
+  dev.off()
+  
+  # Nearest neighbor matching on propensity score
+  pscore.match <- matchit(tx ~ sex+antih+barb+chemo+cage+cigar+lgest+lmotage+lpbc415+lpbc420+motht+motwt+mbirth+psydrug+respir+ses+sib, data = h$df, method = "nearest", distance = "logit", discard="control")
+  pscore.data <- match.data(pscore.match)
+  matchbal$pscore <- apply(as.matrix(pscore.data[pscore.data$tx==1, 3:(n.covars+2)]), 2, mean) - apply(as.matrix(pscore.data[pscore.data$tx==0, 3:(n.covars+2)]), 2, mean)
+  matchimbal$pscore <- list(cem::imbalance(group=pscore.data$tx, data=pscore.data[ , 1:(n.covars+2)], drop=c("outcome", "tx")))
+  matchreg$pscore <- list(lm(outcome ~ tx+sex+antih+barb+chemo+cage+cigar+lgest+lmotage+lpbc415+lpbc420+motht+motwt+mbirth+psydrug+respir+ses+sib, data = pscore.data))
+  
+  # Mahalanobis distance nearest neighbor matching
+  mahalanobis.match <- matchit(tx ~ sex+antih+barb+chemo+cage+cigar+lgest+lmotage+lpbc415+lpbc420+motht+motwt+mbirth+psydrug+respir+ses+sib, data = h$df, method = "nearest", distance = "mahalanobis", discard="control")
+  mahalanobis.data <- match.data(mahalanobis.match)
+  matchbal$mahalanobis <- apply(as.matrix(mahalanobis.data[mahalanobis.data$tx==1, 3:(n.covars+2)]), 2, mean) - apply(as.matrix(mahalanobis.data[mahalanobis.data$tx==0, 3:(n.covars+2)]), 2, mean)
+  matchimbal$mahalanobis <- list(cem::imbalance(group=mahalanobis.data$tx, data=mahalanobis.data[ , 1:(n.covars+2)], drop=c("outcome", "tx")))
+  matchreg$mahalanobis <- list(lm(outcome ~ tx+sex+antih+barb+chemo+cage+cigar+lgest+lmotage+lpbc415+lpbc420+motht+motwt+mbirth+psydrug+respir+ses+sib, data = mahalanobis.data))
+  
+  # Create comparison plot
+  png(paste("Balcomp", n.covars, ".png", sep=""), height=8, width=10, units = "in", res = 300)
+  plot(1, 0, type = "n", main = "Covariate Balance Comparison by Method \n (Treated Mean Minus Control Mean)", ylab = "Difference in Means",
+       xlab = "               All Data            Trimmed by PScore     Matched on PScore    Mahalanobis Matched", xlim = c(0, 5), ylim = c(min(matchbal), max(matchbal)))
+  for (x in 1:n.covars){
+    lines(1:4, matchbal[x, 1:4], type = "b", pch = 20)
+    text(x=0.75*runif(1), y=as.numeric(matchbal[x, 1]), colnames(h$df)[x+2])
+    text(x=4.25+0.75*runif(1), y=as.numeric(matchbal[x, 4]), colnames(h$df)[x+2])}
+  abline(h=0, lty = 2, col = "red")
+  dev.off()
+  
+  # Output is a three-element list: difference in means, L1, and regression results  
+  return(list("matchbal"=matchbal, "matchimbal"=matchimbal, "matchreg"=matchreg))}
+
+#' Generate match output
+#'
+#' @param cdata An object created with the cdata command
+#' @export
+#' @examples
+#' match.compare()
+match.compare <- function(h){
+  
+  # Compute outputs
+  newmatch <- lapply(2:(ncol(h$df)-2), function (x) match.covars(x))
+  # This also generates the PScore histograms and balance comparison graphs as .png files
+  
+  # Compare imbalance as a table
+  imbalance.chart <- data.frame("n.covar"=2:(ncol(h$df)-2), "all"=NA, "trimmed"=NA, "pscore"=NA, "mahalanobis"=NA)
+  for (i in 1:(ncol(h$df)-3)){
+    imbalance.chart[i, ] <- c(i+1, sapply(1:4, function(x) {newmatch[[i]]$matchimbal[[x]][[1]]$L1$L1}))}
+  print(round(imbalance.chart, 2))
+  
+  # Compare treatment effect as a table
+  ate.chart <- rbind(t(sapply(1:4, function (x) summary(newmatch[[16]]$matchreg[[x]][[1]])$coef["tx", ])))
+  print(round(ate.chart, 3))
+  }
