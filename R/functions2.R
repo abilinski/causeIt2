@@ -101,8 +101,9 @@ des_out <- function(cdata, bin_no=30, col_bar= "purple4", col_line="#d3d3d3", qu
 #' @param theme Ggplot theme
 #' @examples
 #' des_covs()
-des_covs <- function(cdata, covs = c(1), bin_no=30, quints = 0, col_bar= "purple4", col_line="#d3d3d3", theme = theme_bw()){
-  
+
+des_covs <- function(cdata, covs = c(1), bin_no=30, quints = 0, col_bar= "purple4", col_line="#d3d3d3", 
+                     theme = theme_bw()){
   ## Set up empty list
   out <- list()
   
