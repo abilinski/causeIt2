@@ -4,7 +4,6 @@ library(stargazer)
 library(cem)
 library(MatchIt)
 
-
 ##### SET DEFAULT THEME
 t <- theme(axis.line = element_line(), panel.background = element_blank(), 
            plot.background = element_blank(), panel.grid.major=element_blank(),
