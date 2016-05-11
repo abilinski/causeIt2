@@ -108,8 +108,7 @@ des_covs <- function(cdata, covs = c(1), bin_no=30, quints = 0, col_bar= "purple
   out <- list()
   
   ## Set up covariate names to pull
-  df <- cdata$df[,]
-  if (covs != 1) df <- df[c(covs)]
+  df <- cdata$df
   cov_types <- cdata$cov_type
   
   ## Make happy graphs
@@ -122,7 +121,7 @@ des_covs <- function(cdata, covs = c(1), bin_no=30, quints = 0, col_bar= "purple
       
       if (quints == 1) g <- geom_vline(xintercept = quantile(df$out[df$tx==0], c(seq(.2, .8, by=.2))))
       if (quints == 2) g <- geom_vline(xintercept = quantile(df$out[df$tx==1], c(seq(.2, .8, by=.2))))
-                                                                      
+    }                                                            
     if(cov_types[i]!=1) {
       g <- ggplot(df, aes_string(colnames(df)[i+2])) + 
         geom_bar(fill = col_bar) + theme + 
@@ -130,12 +129,11 @@ des_covs <- function(cdata, covs = c(1), bin_no=30, quints = 0, col_bar= "purple
     }
     
     out[[i]] <- g
-  }
+    }
   
   out[[length(cov_types)+1]] <- "[Use arrows in R studio to view multiple plots.] 1) The distribution of covariates variable in the treatment and control groups should overlap.  If they don't, you cannot impute missing potential outcomes in regions in which they do not overlap.  If there are areas of one distribution for which there are few or no observations of the other, you may want to trim these.  2) Distributions of covariates in treatment and control should also be balanced.  If they are not, you may want to adjust for them in regression or consider matching methods."
   
   return(out)
-  }
 }
 
 #************************************ REGRESSION ***************************************#
