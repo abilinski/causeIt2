@@ -1,8 +1,8 @@
 Package: causeIt
 Title: Methods for Causal Inference
 Version: 0.0.0.9000
-Authors@R: person("Alyssa", "Bilinski", email = "abilinski@g.harvard.edu", role = c("aut", "cre")),
-person("Peter", "Dyrud", email = "dyrud@g.harvard.edu", role = c("aut", "cre"))
+Authors@R: c(person("Alyssa", "Bilinski", email = "abilinski@g.harvard.edu", role = c("aut", "cre")),
+person("Peter", "Dyrud", email = "dyrud@g.harvard.edu", role = c("aut", "cre")))
 Description: The package provides tools to facilitate rigorous causal inference.
 Depends:
     R (>= 3.2.4)
