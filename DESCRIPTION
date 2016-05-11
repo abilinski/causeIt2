@@ -1,11 +1,16 @@
-Package: causeIt2
-Title: What the Package Does (one line, title case)
+Package: causeIt
+Title: Methods for Causal Inference
 Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Authors@R: person("Alyssa", "Bilinski", email = "abilinski@g.harvard.edu", role = c("aut", "cre"))
+person("Peter", "Dyrud", email = "dyrud@g.harvard.edu", role = c("aut", "cre"))
+Description: The package provides tools to facilitate rigorous causal inference.
 Depends:
     R (>= 3.2.4)
+Imports:
+    ggplot2,
+    MatchIt,
+    stargazer,
+    cem
 License: What license is it under?
-Encoding: UTF-8
 LazyData: true
 RoxygenNote: 5.0.1.9000
