@@ -2,6 +2,7 @@
 
 export(cause_reg)
 export(cdata)
+export(des_covs)
 export(des_out)
 export(match.compare)
 export(reg_diag)

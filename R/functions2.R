@@ -97,6 +97,7 @@ des_out <- function(cdata, bin_no=30, col_bar= "purple4", col_line="#d3d3d3", qu
 #' @param bin_no The number of histogram bins, defaults to 30
 #' @param quints Adds quintiles to plots, 1 for control, 2 for treatment, defaults to none 0
 #' @param theme Ggplot theme
+#' @export
 #' @examples
 #' des_covs()
 des_covs <- function(cdata, covs = c(1), bin_no=30, quints = 0, col_bar= "purple4", col_line="#d3d3d3", 
@@ -131,12 +132,6 @@ des_covs <- function(cdata, covs = c(1), bin_no=30, quints = 0, col_bar= "purple
   out[[length(cov_types)+1]] <- "[Use arrows in R studio to view multiple plots.] 1) The distribution of covariates variable in the treatment and control groups should overlap.  If they don't, you cannot impute missing potential outcomes in regions in which they do not overlap.  If there are areas of one distribution for which there are few or no observations of the other, you may want to trim these.  2) Distributions of covariates in treatment and control should also be balanced.  If they are not, you may want to adjust for them in regression or consider matching methods."
   
   return(out)
-}
-
-#' Test function
-#' test()
-test <- function(){
-  print("test")
 }
 
 #************************************ REGRESSION ***************************************#
