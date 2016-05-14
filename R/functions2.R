@@ -17,8 +17,8 @@ t <- theme(axis.line = element_line(), panel.background = element_blank(),
            legend.text=element_text(size = 10),
            legend.key = element_blank())
 
-########
-counter <- 0
+pkg.env <- new.env()
+pkg.env$counter <- 0
 
 #************************************ CREATE CDATA OBJECT ***************************************#
 
@@ -194,8 +194,8 @@ cause_reg <- function(cdata, covs = (1), digits = 2){
   mod <- lm(outcome~., data=df)
   
   # counter
-  counter <<- counter + 1
-  text <- paste("You have run", counter, "regression(s).")
+  pkg.env$counter <<- pkg.env$counter + 1
+  text <- paste("You have run", pkg.env$counter, "regression(s).")
   
   # make graph
   v <- stargazer(mod, type = "text", ci = TRUE, digits = 2)
