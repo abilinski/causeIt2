@@ -133,50 +133,10 @@ des_covs <- function(cdata, covs = c(1), bin_no=30, quints = 0, col_bar= "purple
   return(out)
 }
 
-#' Explore covariates
-#'
-#' This function allows you to explore overlap and imbalance in outcomes by covariates
-#' @param cdata An object created with the cdata command
-#' @param covs A vector of covariate names to include, defaults to all
-#' @param col_bar The color of your histogram bars, defaults to "purple4"
-#' @param col_line The color of your lines, defaults to "#d3d3d3"
-#' @param bin_no The number of histogram bins, defaults to 30
-#' @param quints Adds quintiles to plots, 1 for control, 2 for treatment, defaults to none 0
-#' @param theme Ggplot theme
-#' @examples
-#' des_covs2()
-des_covs2 <- function(cdata, covs = c(1), bin_no=30, quints = 0, col_bar= "purple4", col_line="#d3d3d3", 
-                     theme = theme_bw()){
-  ## Set up empty list
-  out <- list()
-  
-  ## Set up covariate names to pull
-  df <- cdata$df
-  cov_types <- cdata$cov_type
-  
-  ## Make happy graphs
-  for(i in 1:length(cov_types)) {
-    if(cov_types[i]==1) {
-      g <- ggplot(df, aes_string(colnames(df)[i+2], "..density..")) + 
-        geom_histogram(fill = col_bar, bins = bin_no) + theme + 
-        facet_grid(tx~., scale="free_y") +
-        labs(title = "Covariate distributions")
-      
-      if (quints == 1) g <- geom_vline(xintercept = quantile(df$out[df$tx==0], c(seq(.2, .8, by=.2))))
-      if (quints == 2) g <- geom_vline(xintercept = quantile(df$out[df$tx==1], c(seq(.2, .8, by=.2))))
-    }                                                            
-    if(cov_types[i]!=1) {
-      g <- ggplot(df, aes_string(colnames(df)[i+2])) + 
-        geom_bar(fill = col_bar) + theme + 
-        facet_grid(tx~., scale="free_y") + labs(title = "Covariate distributions")
-    }
-    
-    out[[i]] <- g
-  }
-  
-  out[[length(cov_types)+1]] <- "[Use arrows in R studio to view multiple plots.] 1) The distribution of covariates variable in the treatment and control groups should overlap.  If they don't, you cannot impute missing potential outcomes in regions in which they do not overlap.  If there are areas of one distribution for which there are few or no observations of the other, you may want to trim these.  2) Distributions of covariates in treatment and control should also be balanced.  If they are not, you may want to adjust for them in regression or consider matching methods."
-  
-  return(out)
+#' Test function
+#' test()
+test <- function(){
+  print("test")
 }
 
 #************************************ REGRESSION ***************************************#
